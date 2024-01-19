@@ -1,8 +1,9 @@
 const express = require("express");
 const dotenv = require("dotenv").config();
 const app = express();
+const connectDb=require("./Config/db_connection")
 const port = process.env.PORT;
-
+connectDb()
 // app.get("/api/contacts",(req,res)=>{
 //     res.status(200).json({message:"get all the contacts"});
 // })

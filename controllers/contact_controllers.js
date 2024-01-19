@@ -1,30 +1,59 @@
-//@desc Get all contact
-//@route Get /api/contacts
-//@access public
+const Contact = require("../models/contatctmodel");
 const asynchandler = require("express-async-handler");
+
 const getContact = async (req, res) => {
-  res.send("get all the contacts");
+  const contacts = await Contact.find();
+  res.status(200).json({ contacts });
 };
 
 const specificContact = asynchandler(async (req, res) => {
-  res.send(`get only this ${req.params.id} contact`);
+  const contact = await Contact.findById(req.params.id);
+  if (!contact) {
+    res.status(404);
+    throw new Error("contact not found");
+  }
+  // if contact is found
+  res.status(200).json(contact);
 });
 
 const createContact = asynchandler(async (req, res) => {
   console.log(req.body);
-  const { name, age, sex } = req.body;
-  if (!name || !age || !sex) {
+  const { name, email } = req.body;
+  // if it is empty
+  if (!name || !email) {
     res.status(404).json({ message: "all fields are required" });
   }
-  res.send("post contact");
+  // if not create an object of this model
+  const contact = await Contact.create({
+    name,
+    email,
+  });
+  res.status(201).json(contact);
 });
 
 const updateContact = asynchandler(async (req, res) => {
-  res.send(`update this contact ${req.params.id}`);
+  const contact = await Contact.findById(req.params.id);
+  if (!contact) {
+    res.status(404);
+    throw new Error("contact not found");
+  }
+
+  const updatedcontact = await Contact.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true }
+  );
+  res.status(200).json(updatedcontact);
 });
 
 const deleteContact = asynchandler(async (req, res) => {
-  res.send(`delete this ${req.params.id}`);
+  const contact = await Contact.findById(req.params.id);
+  if (!contact) {
+    res.status(404);
+    throw new Error("contact not found");
+  }
+  await Contact.deleteOne({ _id: req.params.id})
+  res.status(200).json(contact);
 });
 
 module.exports = {
