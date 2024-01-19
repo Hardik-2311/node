@@ -5,8 +5,9 @@ const {
   loginuser,
   registeruser,
 } = require("../controllers/user_controllers");
+const validateToken = require("../middleware/accessverification");
 
-router.route("/current").get(currentuser);
+router.route("/current").get(validateToken, currentuser);
 router.route("/register").post(registeruser);
 router.route("/login").post(loginuser);
 

@@ -1,9 +1,10 @@
 const user = require("../models/usermodel");
 const asynchandler = require("express-async-handler");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 const currentuser = asynchandler(async (req, res) => {
-  res.status(200).json({ message: "current user" });
+  res.status(200).json(req.user);
 });
 
 const registeruser = asynchandler(async (req, res) => {
@@ -31,12 +32,32 @@ const registeruser = asynchandler(async (req, res) => {
   res.status(200).json(userObj);
 });
 
+const loginuser = asynchandler(async (req, res) => {
+  const { email, password } = req.body;
 
+  if (!email || !password) {
+    res.status(404);
+    throw new Error("all fields are required");
+  }
 
-
-const loginuser = asynchandler((req, res) => {
-  const {email,password}=req.body
-  res.status(200).json({ message: "login user" });
+  const userobj = await user.findOne({ email });
+  if (userobj && (await bcrypt.compare(password, userobj.password))) {
+    const accesstoken = jwt.sign(
+      {
+        userobj: {
+          username: userobj.username,
+          email: userobj.email,
+          id: userobj.id,
+        },
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "3m" }
+    );
+    res.status(200).json({ accesstoken });
+  } else {
+    res.send(401);
+    throw new Error("email or password is not valid");
+  }
 });
 
 module.exports = { currentuser, registeruser, loginuser };
