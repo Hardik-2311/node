@@ -1,10 +1,10 @@
 const Contact = require("../models/contatctmodel");
 const asynchandler = require("express-async-handler");
 
-const getContact = async (req, res) => {
+const getContact = asynchandler(async (req, res) => {
   const contacts = await Contact.find();
   res.status(200).json({ contacts });
-};
+});
 
 const specificContact = asynchandler(async (req, res) => {
   const contact = await Contact.findById(req.params.id);
